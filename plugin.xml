@@ -4,7 +4,7 @@
     xmlns:rim="http://www.blackberry.com/ns/widgets"
     xmlns:android="http://schemas.android.com/apk/res/android"
     id="cordova-plugin-wechat"
-    version="0.6.0">
+    version="0.6.1">
     <name>Wechat</name>
     <description>Cordova plugin for Tencent WeChat SDK</description>
     <license>MIT</license>
@@ -15,8 +15,8 @@
 	<dependency id="cordova-plugin-extension"/>
 
     <!-- option 1: change the appId in Wechat.java -->
-    <!-- option 2: remove comment then plugin add with --variable WECHATAPPID=value -->
-    <!-- preference name="WechatAppId" value="wx0c5bd30aa791c589" /-->
+    <!-- option 2: remove comment then plugin add with variable WECHATAPPID=value -->
+    <!-- preference name="WechatAppId" value="wx0c5bd30aa791c589" / -->
 
     <js-module src="www/wechat.js" name="Wechat">
         <clobbers target="Wechat" />
