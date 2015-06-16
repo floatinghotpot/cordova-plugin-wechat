@@ -3,17 +3,20 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
     xmlns:rim="http://www.blackberry.com/ns/widgets"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    id="xu.li.cordova.wechat"
-    version="0.5.2">
+    id="cordova-plugin-wechat"
+    version="0.6.0">
     <name>Wechat</name>
-    <description>A cordova plugin, a JS version of Wechat SDK</description>
+    <description>Cordova plugin for Tencent WeChat SDK</description>
     <license>MIT</license>
     <keywords>cordova,wechat,weixin,share</keywords>
-    <repo>https://github.com/xu-li/cordova-plugin-wechat.git</repo>
-    <issue>https://github.com/xu-li/cordova-plugin-wechat/issues</issue>
+    <repo>https://github.com/floatinghotpot/cordova-plugin-wechat.git</repo>
+    <issue>https://github.com/floatinghotpot/cordova-plugin-wechat/issues</issue>
 
-    <!-- add this to your config.xml -->
-    <!-- <preference name="WechatAppId" value="YOUR_WECHAT_APP_ID_HERE" /> -->
+	<dependency id="cordova-plugin-extension"/>
+
+    <!-- option 1: change the appId in Wechat.java -->
+    <!-- option 2: remove comment then plugin add with --variable WECHATAPPID=value -->
+    <!-- preference name="WechatAppId" value="wx0c5bd30aa791c589" /-->
 
     <js-module src="www/wechat.js" name="Wechat">
         <clobbers target="Wechat" />
@@ -37,7 +40,7 @@
                     <string>wechat</string>
                     <key>CFBundleURLSchemes</key>
                     <array>
-                        <string>YOUR_WECHAT_APP_ID</string>
+                        <string>wx0c5bd30aa791c589</string>
                     </array>
                 </dict>
             </array>

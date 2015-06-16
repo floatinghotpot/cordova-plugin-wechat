@@ -14,6 +14,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 
+import com.rjfun.cordova.ext.CordovaPluginExt;
+
 import com.tencent.mm.sdk.modelmsg.SendAuth;
 import com.tencent.mm.sdk.modelmsg.SendMessageToWX;
 import com.tencent.mm.sdk.modelmsg.WXMediaMessage;
@@ -22,7 +24,7 @@ import com.tencent.mm.sdk.modelmsg.WXWebpageObject;
 import com.tencent.mm.sdk.openapi.IWXAPI;
 import com.tencent.mm.sdk.openapi.WXAPIFactory;
 
-public class Wechat extends CordovaPlugin {
+public class Wechat extends CordovaPluginExt {
 
 	public static final String WXAPPID_PROPERTY_KEY = "wechatappid";
 
@@ -63,9 +65,12 @@ public class Wechat extends CordovaPlugin {
     public static final int SCENE_SESSION = 0;
     public static final int SCENE_TIMELINE = 1;
     public static final int SCENE_FAVORITE = 2;
-    
+
 	public static IWXAPI wxAPI;
 	public static CallbackContext currentCallbackContext;
+
+    protected String appId = "wx0c5bd30aa791c589"; // if null, then find it with preferences.getString(WXAPPID_PROPERTY_KEY, "");
+    protected boolean appRegistered = false;
 
 	@Override
 	public boolean execute(String action, JSONArray args,
@@ -74,13 +79,11 @@ public class Wechat extends CordovaPlugin {
 		if (action.equals("share")) {
 			// sharing
 			return share(args, callbackContext);
-		}
-		else if(action.equals("sendAuthRequest"))
-		{
+
+		} else if(action.equals("sendAuthRequest")) {
 			return sendAuthRequest(args, callbackContext);
-		}
-		else if(action.equals("isWXAppInstalled"))
-		{
+
+		} else if(action.equals("isWXAppInstalled")) {
 			return isInstalled(callbackContext);
 		}
 
@@ -90,17 +93,29 @@ public class Wechat extends CordovaPlugin {
 
 	protected IWXAPI getWXAPI() {
 		if (wxAPI == null) {
-			String appId = preferences.getString(WXAPPID_PROPERTY_KEY, "");
-			wxAPI = WXAPIFactory.createWXAPI(webView.getContext(), appId, true);
+            if(appId == null) appId = preferences.getString(WXAPPID_PROPERTY_KEY, "");
+			wxAPI = WXAPIFactory.createWXAPI(this.getActivity(), appId, true);
 		}
 
 		return wxAPI;
 	}
+
+    protected void validateAppReg() {
+        if(! this.appRegistered) {
+            if(appId == null) appId = preferences.getString(WXAPPID_PROPERTY_KEY, "");
+
+            final IWXAPI api = getWXAPI();
+            api.registerApp( appId );
+
+            this.appRegistered = true;
+        }
+    }
 	
-	protected boolean sendAuthRequest(JSONArray args, CallbackContext callbackContext)
-	{
+	protected boolean sendAuthRequest(JSONArray args, CallbackContext callbackContext) {
+        validateAppReg();
+
 		final IWXAPI api = getWXAPI();
-		api.registerApp(preferences.getString(WXAPPID_PROPERTY_KEY, ""));
+
 		final SendAuth.Req req = new SendAuth.Req();
 		req.state = "wechat_auth";
 		
@@ -124,11 +139,10 @@ public class Wechat extends CordovaPlugin {
 		return true;
 	}
 
-	protected boolean share(JSONArray args, CallbackContext callbackContext)
-			throws JSONException {
-		final IWXAPI api = getWXAPI();
+	protected boolean share(JSONArray args, CallbackContext callbackContext) throws JSONException {
+        validateAppReg();
 
-		api.registerApp(preferences.getString(WXAPPID_PROPERTY_KEY, ""));
+		final IWXAPI api = getWXAPI();
 
 		// check if installed
 		if (!api.isWXAppInstalled()) {
@@ -183,13 +197,13 @@ public class Wechat extends CordovaPlugin {
 	}
 
 	protected boolean isInstalled(CallbackContext callbackContext){
-		final IWXAPI api = getWXAPI();
-		api.registerApp(preferences.getString(WXAPPID_PROPERTY_KEY, ""));
+        validateAppReg();
 
-		if (!api.isWXAppInstalled()) {
+		final IWXAPI api = getWXAPI();
+		if (! api.isWXAppInstalled()) {
 			callbackContext.error(ERROR_WX_NOT_INSTALLED);
 			return false;
-		}else{
+		} else {
 			callbackContext.success("true");
 		}
 		currentCallbackContext = callbackContext;
@@ -209,9 +223,8 @@ public class Wechat extends CordovaPlugin {
             textObject.text = params.getString(KEY_ARG_TEXT);
             mediaObject = textObject;
             wxMediaMessage.description = textObject.text;
-		}
-		else
-		{
+
+		} else {
 			JSONObject message = params.getJSONObject(KEY_ARG_MESSAGE);
 			JSONObject media = message.getJSONObject(KEY_ARG_MESSAGE_MEDIA);
 			

@@ -1,0 +1,37 @@
+{
+  "name": "cordova-plugin-wechat",
+  "version": "0.6.0",
+  "description": "Cordova plugin for WeChat",
+  "cordova": {
+    "id": "cordova-plugin-wechat",
+    "platforms": [
+      "android",
+      "ios"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/floatinghotpot/cordova-plugin-wechat.git"
+  },
+  "bugs": {
+    "url": "https://github.com/floatinghotpot/cordova-plugin-wechat/issues"
+  },
+  "keywords": [
+    "cordova",
+    "ecosystem:cordova",
+    "ad",
+    "admob",
+    "google",
+    "rjfun"
+  ],
+  "author": {
+    "name": "Xu Li"
+  },
+  "contributors": [{
+    "name": "Xu Li"
+  },{
+    "name": "Raymond Xie",
+    "email": "rjfun.mobile@gmail.com"
+  }],
+  "license": "MIT"
+}
