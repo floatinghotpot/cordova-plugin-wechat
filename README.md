@@ -8,15 +8,13 @@ Share title, description, image, and link to wechat moment(朋友圈)
 
 # Example
 
-See [cordova-plugin-wechat-example](https://github.com/xu-li/cordova-plugin-wechat-example)
+See example in [demo js file](https://github.com/floatinghotpot/cordova-plugin-wechat/blob/master/demo/js/controllers.js).
 
 # Install(iOS)
 
-1. ```cordova plugin add https://github.com/xu-li/cordova-plugin-wechat```, or using [plugman](https://npmjs.org/package/plugman), [phonegap](https://npmjs.org/package/phonegap), [ionic](http://ionicframework.com/)
+1. ```cordova plugin add cordova-plugin-wechat```, or using [plugman](https://npmjs.org/package/plugman), [phonegap](https://npmjs.org/package/phonegap), [ionic](http://ionicframework.com/)
 
-2. Add ```<preference name="wechatappid" value="YOUR_WECHAT_APP_ID" />``` in your config.xml
-
-3. ```cordova build ios```
+2. ```cordova build ios```
 
 4. Change the URL Type using XCode
 
@@ -27,6 +25,13 @@ I found some older version of cordova(ionic 1.3.0) doesn't trigger this js, so i
 
 
 # Usage
+
+## Set AppId before call other APIs
+```javascript
+Wechat.setOptions({
+    appId: 'wx1234567890' // your app id here
+});
+```
 
 ## Check if wechat is installed
 ```Javascript
