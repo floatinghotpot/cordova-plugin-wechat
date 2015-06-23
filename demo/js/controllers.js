@@ -117,7 +117,7 @@ angular.module('starter.controllers', [])
             };
 
             Wechat.setOptions({
-                appId: 'wx0c5bd30aa791c589'
+                appId: 'wx9309e279533bd49b' //'wx0c5bd30aa791c589'
             });
 
             switch (id) {

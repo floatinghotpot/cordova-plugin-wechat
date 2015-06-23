@@ -1,15 +1,13 @@
-package xu.li.cordova.wechat;
+package com.rjfun.cordova.wechat;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.apache.cordova.CallbackContext;
-import org.apache.cordova.CordovaPlugin;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
@@ -25,8 +23,18 @@ import com.tencent.mm.sdk.openapi.IWXAPI;
 import com.tencent.mm.sdk.openapi.WXAPIFactory;
 
 public class Wechat extends CordovaPluginExt {
+	private static final String LOGTAG = "WechatPlugin";
 
 	public static final String WXAPPID_PROPERTY_KEY = "wechatappid";
+
+	public static final String ACTION_SET_OPTIONS = "setOptions";
+	public static final String ACTION_SHARE = "share";
+	public static final String ACTION_SEND_AUTH_REQUEST = "sendAuthRequest";
+	public static final String ACTION_IS_WXAPP_INSTALLED = "isWXAppInstalled";
+	
+	public static final String OPT_APPID = "appId";
+    public static final String OPT_APPKEY = "appKey";
+    public static final String OPT_APPNAME = "appName";
 
 	public static final String ERROR_WX_NOT_INSTALLED = "Not installed";
 	public static final String ERROR_ARGUMENTS = "Argument Error";
@@ -66,30 +74,51 @@ public class Wechat extends CordovaPluginExt {
     public static final int SCENE_TIMELINE = 1;
     public static final int SCENE_FAVORITE = 2;
 
-	public static IWXAPI wxAPI;
-	public static CallbackContext currentCallbackContext;
-
-    protected String appId = "wx0c5bd30aa791c589"; // if null, then find it with preferences.getString(WXAPPID_PROPERTY_KEY, "");
     protected boolean appRegistered = false;
+    protected String appId = "wx0c5bd30aa791c589"; // if null, then find it with preferences.getString(WXAPPID_PROPERTY_KEY, "");
+    protected String appKey = "";
+    protected String appName = "";
+
+	public static IWXAPI wxAPI = null;
+	public static CallbackContext currentCallbackContext = null;
 
 	@Override
-	public boolean execute(String action, JSONArray args,
-			CallbackContext callbackContext) throws JSONException {
-		
-		if (action.equals("share")) {
+	public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
+		if (ACTION_SET_OPTIONS.equals(action)) {
+			JSONObject options = args.optJSONObject(0);
+			if(options != null) {
+				this.setOptions(options);
+			}
+			callbackContext.success();
+			return true;
+			
+		} else if (ACTION_SHARE.equals(action)) {
 			// sharing
 			return share(args, callbackContext);
 
-		} else if(action.equals("sendAuthRequest")) {
+		} else if(ACTION_SEND_AUTH_REQUEST.equals(action)) {
 			return sendAuthRequest(args, callbackContext);
 
-		} else if(action.equals("isWXAppInstalled")) {
+		} else if(ACTION_IS_WXAPP_INSTALLED.equals(action)) {
 			return isInstalled(callbackContext);
 		}
 
-
 		return super.execute(action, args, callbackContext);
 	}
+
+    public void setOptions(JSONObject options) {
+    	Log.d(LOGTAG, "setOptions" );
+    	
+    	if(options != null) {
+            if(options.has(OPT_APPID)) this.appId = options.optString(OPT_APPID);
+            if(options.has(OPT_APPKEY)) this.appKey = options.optString(OPT_APPKEY);
+            if(options.has(OPT_APPNAME)) this.appName = options.optString(OPT_APPNAME);
+            
+            if((appId != null) && (appId.length()>0)) {
+            	validateAppReg();
+            }
+    	}
+    }
 
 	protected IWXAPI getWXAPI() {
 		if (wxAPI == null) {
@@ -178,8 +207,9 @@ public class Wechat extends CordovaPluginExt {
 		}
 
 		// run in background
-		cordova.getThreadPool().execute(new Runnable() {
-
+		// cordova.getThreadPool().execute(new Runnable() {
+        final Activity activity = this.getActivity();
+        activity.runOnUiThread(new Runnable(){
 			@Override
 			public void run() {
 				try {
@@ -246,8 +276,7 @@ public class Wechat extends CordovaPluginExt {
 
 			
 			wxMediaMessage.title = message.getString(KEY_ARG_MESSAGE_TITLE);
-			wxMediaMessage.description = message
-					.getString(KEY_ARG_MESSAGE_DESCRIPTION);
+			wxMediaMessage.description = message.getString(KEY_ARG_MESSAGE_DESCRIPTION);
 			if (thumbnail != null) {
 				wxMediaMessage.setThumbImage(thumbnail);
 			}

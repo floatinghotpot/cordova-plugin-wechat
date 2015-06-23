@@ -4,7 +4,7 @@
     xmlns:rim="http://www.blackberry.com/ns/widgets"
     xmlns:android="http://schemas.android.com/apk/res/android"
     id="cordova-plugin-wechat"
-    version="0.6.2">
+    version="0.6.4">
     <name>Wechat</name>
     <description>Cordova plugin for Tencent WeChat SDK</description>
     <license>MIT</license>
@@ -70,9 +70,16 @@
 
         <config-file target="res/xml/config.xml" parent="/*">
             <feature name="Wechat">
-                <param name="android-package" value="xu.li.cordova.wechat.Wechat"/>
+                <param name="android-package" value="com.rjfun.cordova.wechat.Wechat"/>
             </feature>
         </config-file>
+        
+        <config-file target="AndroidManifest.xml" parent="/*">
+			<uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+			<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+        </config-file>
+          
+
 
         <config-file target="AndroidManifest.xml" parent="/manifest/application">
           <activity
@@ -87,7 +94,7 @@
           </activity>
         </config-file>
 
-        <source-file src="src/android/Wechat.java" target-dir="src/xu/li/cordova/wechat" />
+        <source-file src="src/android/Wechat.java" target-dir="src/com/rjfun/cordova/wechat" />
         <source-file src="src/android/libammsdk.jar" target-dir="libs" />
         <!--
             微信需要回调app的package name下的wxapi/WXEntryActivity.java，所以使用钩子 (hook) 脚本android-install.js添加到你的项目 id 对应的文件夹中,
