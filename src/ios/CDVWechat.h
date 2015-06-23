@@ -6,9 +6,13 @@
 //
 //
 
-#import <Cordova/CDV.h>
+#import "CDVPluginExt.h"
 #import "WXApi.h"
 #import "WXApiObject.h"
+
+#define OPT_APPID           @"appId"
+#define OPT_APPKEY          @"appKey"
+#define OPT_APPNAME         @"appName"
 
 enum  CDVWechatSharingType {
     CDVWXSharingTypeApp = 1,
@@ -20,14 +24,29 @@ enum  CDVWechatSharingType {
     CDVWXSharingTypeWebPage
 };
 
-@interface CDVWechat:CDVPlugin <WXApiDelegate>
+@interface CDVWechat:CDVPluginExt <WXApiDelegate>
 
 @property (nonatomic, strong) NSString *currentCallbackId;
-@property (nonatomic, strong) NSString *wechatAppId;
 
 - (void)isWXAppInstalled:(CDVInvokedUrlCommand *)command;
-- (void)share:(CDVInvokedUrlCommand *)command;
+
+- (void) setOptions:(CDVInvokedUrlCommand *)command;
+
+- (void) share:(CDVInvokedUrlCommand *)command;
+
 - (void)sendAuthRequest:(CDVInvokedUrlCommand *)command;
-- (void)registerApp:(NSString *)wechatAppId;
+
+@property (assign) BOOL inited;
+
+@property (nonatomic, retain) NSString* appId;
+@property (nonatomic, retain) NSString* appKey;
+@property (nonatomic, retain) NSString* appName;
+
+#pragma mark virtual methods
+
+- (void)pluginInitialize;
+
+- (void) parseOptions:(NSDictionary*) options;
+- (void) validateAppReg;
 
 @end

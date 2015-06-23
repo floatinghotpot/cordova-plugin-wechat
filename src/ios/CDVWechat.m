@@ -12,8 +12,54 @@
 
 #pragma mark "API"
 
+- (void)pluginInitialize
+{
+    [super pluginInitialize];
+
+    self.inited = NO;
+    self.appId = @"";
+    self.appKey = @"";
+    self.appName = @"";
+}
+
+- (void) setOptions:(CDVInvokedUrlCommand *)command {
+    NSLog(@"setOptions");
+
+    if([command.arguments count] > 0) {
+        NSDictionary* options = [command argumentAtIndex:0 withDefault:[NSNull null]];
+        [self parseOptions:options];
+    }
+
+    [self sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK] to:command.callbackId];
+}
+
+- (void) validateAppReg {
+    if(! self.inited) {
+        [WXApi registerApp: self.appId];
+        self.inited = true;
+    }
+}
+
+- (void) parseOptions:(NSDictionary*) options
+{
+    if ((NSNull *)options == [NSNull null]) return;
+
+    NSString* str = nil;
+
+    str = [options objectForKey:OPT_APPID];
+    if(str) self.appId = str;
+
+    str = [options objectForKey:OPT_APPKEY];
+    if(str) self.appKey = str;
+
+    str = [options objectForKey:OPT_APPNAME];
+    if(str) self.appName = str;
+}
+
 - (void)isWXAppInstalled:(CDVInvokedUrlCommand *)command
 {
+    [self validateAppReg];
+
     CDVPluginResult *commandResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:[WXApi isWXAppInstalled]];
     
     [self.commandDelegate sendPluginResult:commandResult callbackId:command.callbackId];
@@ -21,6 +67,8 @@
 
 - (void)share:(CDVInvokedUrlCommand *)command
 {
+    [self validateAppReg];
+
     // if not installed
     if (![WXApi isWXAppInstalled])
     {
@@ -110,15 +158,6 @@
     }
 }
 
-- (void)registerApp:(NSString *)wechatAppId
-{
-    self.wechatAppId = wechatAppId;
-    
-    [WXApi registerApp:wechatAppId];
-
-    NSLog(@"Register wechat app: %@", wechatAppId);
-}
-
 #pragma mark "WXApiDelegate"
 
 /**
@@ -198,7 +237,7 @@
 {
     NSURL* url = [notification object];
     
-    if ([url isKindOfClass:[NSURL class]] && [url.scheme isEqualToString:self.wechatAppId])
+    if ([url isKindOfClass:[NSURL class]] && [url.scheme isEqualToString:self.appId])
     {
         [WXApi handleOpenURL:url delegate:self];
     }

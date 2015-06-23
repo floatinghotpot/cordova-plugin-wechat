@@ -17,6 +17,16 @@ module.exports = {
         WEBPAGE: 7
     },
 
+    setOptions : function(options, successCallback, failureCallback) {
+	  if(typeof options === 'object') {
+		  cordova.exec( successCallback, failureCallback, 'Wechat', 'setOptions', [ options ] );
+	  } else {
+		  if(typeof failureCallback === 'function') {
+			  failureCallback('options should be specified.');
+		  }
+	  }
+	},
+
     isInstalled: function (onSuccess, onError) {
         exec(onSuccess, onError, "Wechat", "isWXAppInstalled", []);
     },
