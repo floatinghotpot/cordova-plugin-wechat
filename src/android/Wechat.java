@@ -1,13 +1,20 @@
 package com.rjfun.cordova.wechat;
 
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.cordova.CallbackContext;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
@@ -240,6 +247,19 @@ public class Wechat extends CordovaPluginExt {
 		return true;
 	}
 
+    protected InputStream inputStreamFromURL(String url) throws IOException {
+        if(url.startsWith("http://") || url.startsWith("https://")) {
+            URL netUrl = new URL( url );
+            return netUrl.openConnection().getInputStream();
+
+        } else if(url.startsWith("/")) {
+            return new FileInputStream( new File(url) );
+
+        } else {
+            return getClass().getResourceAsStream("/assets/" + url);
+        }
+	}
+
 	protected WXMediaMessage buildSharingMessage(JSONObject params) throws JSONException {
 
 		WXMediaMessage wxMediaMessage = new WXMediaMessage();
@@ -261,10 +281,18 @@ public class Wechat extends CordovaPluginExt {
 
             if(message.has(KEY_ARG_MESSAGE_THUMB)) {
                 try {
-                    URL thumbnailUrl = new URL(message.getString(KEY_ARG_MESSAGE_THUMB));
-                    Bitmap thumbnail = BitmapFactory.decodeStream(thumbnailUrl.openConnection().getInputStream());
-                    if (thumbnail != null) {
-                        wxMediaMessage.setThumbImage(thumbnail);
+                    String thumb = message.getString(KEY_ARG_MESSAGE_THUMB);
+                    if((thumb != null) && (thumb.length()>0)) {
+                        InputStream in = inputStreamFromURL( thumb );
+                        if(in != null) {
+                            byte[] data = IOUtils.toByteArray(in);
+                            if(data != null) {
+                                Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+                                if (bitmap != null) {
+                                    wxMediaMessage.setThumbImage(bitmap);
+                                }
+                            }
+                        }
                     }
                 } catch (Exception e) {
                     Log.e("Wechat", "Thumb URL parsing error", e);
@@ -298,10 +326,14 @@ public class Wechat extends CordovaPluginExt {
 			case TYPE_WX_SHARING_IMAGE:
 				WXImageObject imgObject = new WXImageObject();
 				String img = media.getString(KEY_ARG_MESSAGE_MEDIA_IMAGE);
-				if( img.startsWith("http://") || img.startsWith("https://")) {
-					imgObject.imageUrl = img;
-				} else {
-					imgObject.imagePath = img;
+				try {
+					InputStream in = inputStreamFromURL(img);
+					if(in != null) {
+						imgObject.imageData = IOUtils.toByteArray(in);
+					}
+				} catch (IOException e) {
+					Log.e("Wechat", "bad image url or path", e);
+					e.printStackTrace();
 				}
 				wxMediaMessage.mediaObject = imgObject;
 				break;
