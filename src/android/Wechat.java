@@ -208,10 +208,8 @@ public class Wechat extends CordovaPluginExt {
 			req.scene = SendMessageToWX.Req.WXSceneTimeline;
 		}
 
-		// run in background
-		// cordova.getThreadPool().execute(new Runnable() {
-        final Activity activity = this.getActivity();
-        activity.runOnUiThread(new Runnable(){
+		// run in background, do not run it in main thread, or else will trigger android.os.NetworkOnMainThreadException
+		cordova.getThreadPool().execute(new Runnable() {
 			@Override
 			public void run() {
 				try {
@@ -250,6 +248,7 @@ public class Wechat extends CordovaPluginExt {
 		{
             WXTextObject textObject = new WXTextObject();
             textObject.text = params.getString(KEY_ARG_TEXT);
+
             wxMediaMessage.description = textObject.text;
             wxMediaMessage.mediaObject = textObject;
 
