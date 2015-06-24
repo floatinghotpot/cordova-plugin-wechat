@@ -255,7 +255,7 @@ public class Wechat extends CordovaPluginExt {
 		} else {
 			JSONObject message = params.getJSONObject(KEY_ARG_MESSAGE);
 			JSONObject media = message.getJSONObject(KEY_ARG_MESSAGE_MEDIA);
-			
+
 			wxMediaMessage.title = message.getString(KEY_ARG_MESSAGE_TITLE);
 			wxMediaMessage.description = message.getString(KEY_ARG_MESSAGE_DESCRIPTION);
 
@@ -297,7 +297,12 @@ public class Wechat extends CordovaPluginExt {
 
 			case TYPE_WX_SHARING_IMAGE:
 				WXImageObject imgObject = new WXImageObject();
-				imgObject.imageUrl = media.getString(KEY_ARG_MESSAGE_MEDIA_IMAGE);
+				String img = media.getString(KEY_ARG_MESSAGE_MEDIA_IMAGE);
+				if( img.startsWith("http://") || img.startsWith("https://")) {
+					imgObject.imageUrl = img;
+				} else {
+					imgObject.imagePath = img;
+				}
 				wxMediaMessage.mediaObject = imgObject;
 				break;
 
